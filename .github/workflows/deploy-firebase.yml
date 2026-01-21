@@ -8,6 +8,7 @@ on:
       - "*.zip"
       - "scripts/extract_assets_zips.sh"
       - "firebase.json"
+    workflow_dispatch:
 
 jobs:
   deploy:
