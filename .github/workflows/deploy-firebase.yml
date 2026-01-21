@@ -31,7 +31,14 @@ jobs:
 
       - name: Deploy to Firebase Hosting
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > serviceAccountKey.json
+          # Write service account JSON properly
+          printf "%s" "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > serviceAccountKey.json
+
+          # Set env variable for Firebase CLI
           export GOOGLE_APPLICATION_CREDENTIALS=serviceAccountKey.json
+
+          # Install Firebase CLI
           npm install -g firebase-tools
+
+          # Deploy hosting
           firebase deploy --only hosting
