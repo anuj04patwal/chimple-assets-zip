@@ -16,5 +16,5 @@ for zipfile in *.zip; do
 
   mkdir -p "$target"
   echo "Unzipping $zipfile -> $target"
-  unzip -o "$zipfile" -d "$target"
+  unzip -o "$zipfile" -d "$target" || true
 done
