@@ -6,9 +6,9 @@ on:
       - main
     paths:
       - "*.zip"
-      - "scripts/extract_assets_zips.sh"
+      - "scripts/extract_asset_zips.sh"
       - "firebase.json"
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   deploy:
