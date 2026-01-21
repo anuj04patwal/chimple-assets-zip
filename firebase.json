@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site":"chimple-assets",
     "public": "public",
     "ignore": [
       "firebase.json",
