@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "*.zip"
-      - "scripts/extract_root_zips.sh"
+      - "scripts/extract_assets_zips.sh"
       - "firebase.json"
 
 jobs:
