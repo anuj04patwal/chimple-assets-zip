@@ -27,6 +27,7 @@ jobs:
       - name: Delete public folder completely
         run: |
           rm -rf public
+          mkdir public
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
