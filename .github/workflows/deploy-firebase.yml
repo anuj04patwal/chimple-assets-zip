@@ -21,7 +21,7 @@ jobs:
       - name: Install bsdtar
         run: sudo apt-get update && sudo apt-get install -y libarchive-tools
 
-      - name: Sync ZIPs to public (add / update / delete)
+      - name: Sync ZIPs to public (full reset + incremental)
         run: |
           set -e
           mkdir -p public
@@ -32,20 +32,34 @@ jobs:
           echo "BEFORE=$BEFORE"
           echo "AFTER=$AFTER"
 
-          # SAFETY: first run / force-push / manual
-          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            echo "Invalid BEFORE commit → full rebuild"
+          # ============================================================
+          # FULL RESET CONDITIONS
+          # - manual run
+          # - first deploy
+          # - force-push / rebase
+          # ============================================================
+          if [[ -z "$BEFORE" ]] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "Full reset triggered"
 
-            rm -rf public/*
+            rm -rf public
+            mkdir public
+
             for zip in *.zip; do
               [ -f "$zip" ] || continue
-              echo "Extracting $zip"
-              bsdtar -xf "$zip" -C public/
+              ZIP_NAME=$(basename "$zip" .zip)
+              TARGET_DIR="public/$ZIP_NAME"
+
+              echo "Extracting $zip → $TARGET_DIR"
+              mkdir -p "$TARGET_DIR"
+              bsdtar -xf "$zip" -C "$TARGET_DIR" --strip-components 1
             done
+
             exit 0
           fi
 
-          # Incremental Zip Sync
+          # ============================================================
+          # INCREMENTAL SYNC (ADD / MODIFY / DELETE)
+          # ============================================================
           git diff --name-status "$BEFORE" "$AFTER" | grep '\.zip$' || true | while read status file; do
             ZIP_NAME=$(basename "$file" .zip)
             TARGET_DIR="public/$ZIP_NAME"
@@ -54,7 +68,8 @@ jobs:
               A|M)
                 echo "Updating $ZIP_NAME"
                 rm -rf "$TARGET_DIR"
-                bsdtar -xf "$zip" -C public/
+                mkdir -p "$TARGET_DIR"
+                bsdtar -xf "$file" -C "$TARGET_DIR" --strip-components 1
                 ;;
               D)
                 echo "Deleting $ZIP_NAME"
@@ -62,6 +77,7 @@ jobs:
                 ;;
             esac
           done
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
