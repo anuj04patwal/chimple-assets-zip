@@ -24,32 +24,19 @@ jobs:
       # - name: Extract root zip files
       #   run: bash scripts/extract_asset_zips.sh || true
 
-      - name: Sync ZIPs to public (add / update / delete)
+      - name: Clear public and extract all ZIPs
         run: |
-          mkdir -p public
+          set -e
 
-          BEFORE="${{ github.event.before }}"
-          AFTER="${{ github.sha }}"
+          echo "Clearing public directory"
+          rm -rf public
+          mkdir public
 
-          # 1. Handle added / modified ZIPs
-          git diff --name-status "$BEFORE" "$AFTER" | grep '\.zip$' || true | while read status file; do
-            ZIP_NAME=$(basename "$file" .zip)
-            TARGET_DIR="public/$ZIP_NAME"
-
-            if [[ "$status" == "A" || "$status" == "M" ]]; then
-              echo "Updating $ZIP_NAME"
-              rm -rf "$TARGET_DIR"
-              unzip -o "$file" -d public/
-            fi
-          done
-
-          # 2. Handle deleted ZIPs
-          git diff --name-status "$BEFORE" "$AFTER" | grep '^D.*\.zip$' || true | while read status file; do
-            ZIP_NAME=$(basename "$file" .zip)
-            TARGET_DIR="public/$ZIP_NAME"
-
-            echo "Deleting $TARGET_DIR"
-            rm -rf "$TARGET_DIR"
+          echo "Extracting all ZIPs"
+          for zip in *.zip; do
+            [ -f "$zip" ] || continue
+            echo "Extracting $zip"
+            unzip -o "$zip" -d public/
           done
 
       - name: Setup Node.js
