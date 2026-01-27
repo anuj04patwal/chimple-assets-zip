@@ -18,8 +18,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install unzip
-        run: sudo apt-get update && sudo apt-get install -y unzip
+      - name: Install bsdtar
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools
 
       - name: Sync ZIPs to public (add / update / delete)
         run: |
@@ -32,7 +32,7 @@ jobs:
           echo "BEFORE=$BEFORE"
           echo "AFTER=$AFTER"
 
-          # SAFETY: first run / force-push / manual 
+          # SAFETY: first run / force-push / manual
           if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             echo "Invalid BEFORE commit → full rebuild"
 
@@ -40,7 +40,7 @@ jobs:
             for zip in *.zip; do
               [ -f "$zip" ] || continue
               echo "Extracting $zip"
-              unzip -o "$zip" -d public/
+              bsdtar -xf "$zip" -d public/
             done
             exit 0
           fi
@@ -54,7 +54,7 @@ jobs:
               A|M)
                 echo "Updating $ZIP_NAME"
                 rm -rf "$TARGET_DIR"
-                unzip -o "$file" -d public/
+                bsdtar -xf "$file" -d public/
                 ;;
               D)
                 echo "Deleting $ZIP_NAME"
