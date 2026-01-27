@@ -24,24 +24,32 @@ jobs:
       # - name: Extract root zip files
       #   run: bash scripts/extract_asset_zips.sh || true
 
-      - name: Extract only changed ZIPs (clean replace)
+      - name: Sync ZIPs to public (add / update / delete)
         run: |
           mkdir -p public
 
-          # Get changed zip files in this push
-          CHANGED_ZIPS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.zip$' || true)
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
 
-          echo "Changed ZIPs:"
-          echo "$CHANGED_ZIPS"
-
-          for zip in $CHANGED_ZIPS; do
-            ZIP_NAME=$(basename "$zip" .zip)
+          # 1. Handle added / modified ZIPs
+          git diff --name-status "$BEFORE" "$AFTER" | grep '\.zip$' || true | while read status file; do
+            ZIP_NAME=$(basename "$file" .zip)
             TARGET_DIR="public/$ZIP_NAME"
 
-            echo "Replacing $TARGET_DIR"
-            rm -rf "$TARGET_DIR"
+            if [[ "$status" == "A" || "$status" == "M" ]]; then
+              echo "Updating $ZIP_NAME"
+              rm -rf "$TARGET_DIR"
+              unzip -o "$file" -d public/
+            fi
+          done
 
-            unzip -o "$zip" -d public/
+          # 2. Handle deleted ZIPs
+          git diff --name-status "$BEFORE" "$AFTER" | grep '^D.*\.zip$' || true | while read status file; do
+            ZIP_NAME=$(basename "$file" .zip)
+            TARGET_DIR="public/$ZIP_NAME"
+
+            echo "Deleting $TARGET_DIR"
+            rm -rf "$TARGET_DIR"
           done
 
       - name: Setup Node.js
