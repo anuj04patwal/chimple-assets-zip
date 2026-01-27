@@ -9,7 +9,7 @@
     ],
     "headers": [
       {
-        "source": "**/*.xml",
+        "source": "**",
         "headers": [
           {
             "key": "Access-Control-Allow-Origin",
