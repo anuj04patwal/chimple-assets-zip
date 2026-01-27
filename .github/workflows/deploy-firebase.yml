@@ -40,7 +40,7 @@ jobs:
             for zip in *.zip; do
               [ -f "$zip" ] || continue
               echo "Extracting $zip"
-              bsdtar -xf "$zip" -d public/
+              bsdtar -xf "$zip" -C public/
             done
             exit 0
           fi
@@ -54,7 +54,7 @@ jobs:
               A|M)
                 echo "Updating $ZIP_NAME"
                 rm -rf "$TARGET_DIR"
-                bsdtar -xf "$file" -d public/
+                bsdtar -xf "$zip" -C public/
                 ;;
               D)
                 echo "Deleting $ZIP_NAME"
