@@ -24,20 +24,9 @@ jobs:
       # - name: Extract root zip files
       #   run: bash scripts/extract_asset_zips.sh || true
 
-      - name: Clear public and extract all ZIPs
+      - name: Delete public folder completely
         run: |
-          set -e
-
-          echo "Clearing public directory"
           rm -rf public
-          mkdir public
-
-          echo "Extracting all ZIPs"
-          for zip in *.zip; do
-            [ -f "$zip" ] || continue
-            echo "Extracting $zip"
-            unzip -o "$zip" -d public/
-          done
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
